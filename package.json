@@ -1,0 +1,24 @@
+{
+  "name": "music-play",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/deepakk6088/Music-play.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/deepakk6088/Music-play/issues"
+  },
+  "homepage": "https://github.com/deepakk6088/Music-play#readme",
+  "dependencies": {
+    "audio": "^2.6.9"
+  }
+}
