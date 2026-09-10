@@ -1,9 +1,66 @@
 import fs from "fs";
 import path from "path";
+import audio from "audio";
 
 const songsFolder = path.join(process.cwd(), "songs");
 
 let songs = [];
+let currentAudio = null;
+let currentSong = null;
+
+// let currentSongIndex = -1;
+ 
+
+// let playbackState = "stopped";
+
+// let audioPlayer = null;
+
+// let songDuration = 0;
+// let currentPosition = 0;
+
+// let progressTimer = null;
+
+function playSong(index) {
+    if (index < 0 || index >= songs.length) {
+        console.log("No song selected.");
+        return;
+    }
+
+    // Stop previous song
+    if (currentAudio) {
+        currentAudio.stop();
+        currentAudio = null;
+    }
+
+    currentSong = songs[index];
+
+    try {
+        // Create audio object from selected MP3
+        currentAudio = audio(currentSong);
+
+        // Handle playback errors
+        currentAudio.on("error", (error) => {
+            console.log("\nPlayback error:", error.message);
+        });
+
+        // Handle song completion
+        currentAudio.on("ended", () => {
+            console.log("\nPlayback finished.");
+            currentAudio = null;
+            currentSong = null;
+        });
+
+        // Start playback
+        currentAudio.play();
+
+        console.log(`\nPlaying: ${path.basename(currentSong)}`);
+
+    } catch (error) {
+        console.log("\nCould not play song:", error.message);
+        currentAudio = null;
+        currentSong = null;
+    }
+}
 
 try {
     const files = fs.readdirSync(songsFolder);
@@ -83,12 +140,10 @@ process.stdin.on("data", (key) => {
     }
 
     // Enter
-    else if (key === "\r") {
-        const selectedSong = path.basename(songs[selectedIndex]);
-
-        console.log(`\nSelected: ${selectedSong}`);
-    }
-
+// Enter
+else if (key === "\r") {
+    playSong(selectedIndex);
+}
     // Q - quit
     else if (key.toLowerCase() === "q") {
         process.stdin.setRawMode(false);
