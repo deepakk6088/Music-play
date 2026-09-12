@@ -35,30 +35,28 @@ function playSong(index) {
     currentSong = songs[index];
 
     try {
-        // Create audio object from selected MP3
         currentAudio = audio(currentSong);
 
-        // Handle playback errors
-        currentAudio.on("error", (error) => {
-            console.log("\nPlayback error:", error.message);
-        });
-
-        // Handle song completion
         currentAudio.on("ended", () => {
-            console.log("\nPlayback finished.");
             currentAudio = null;
             currentSong = null;
+            playbackState = "stopped";
+
+            console.log("\nPlayback finished.");
         });
 
-        // Start playback
         currentAudio.play();
+
+        playbackState = "playing";
 
         console.log(`\nPlaying: ${path.basename(currentSong)}`);
 
     } catch (error) {
         console.log("\nCould not play song:", error.message);
+
         currentAudio = null;
         currentSong = null;
+        playbackState = "stopped";
     }
 }
 
@@ -84,6 +82,30 @@ try {
     process.exit(1);
 }
 
+// add pause
+function pauseSong() {
+    if (!currentAudio || playbackState !== "playing") {
+        return;
+    }
+
+    currentAudio.pause();
+    playbackState = "paused";
+
+    console.log("\nPaused.");
+}
+
+
+// add resume
+function resumeSong() {
+    if (!currentAudio || playbackState !== "paused") {
+        return;
+    }
+
+    currentAudio.resume();
+    playbackState = "playing";
+
+    console.log("\nResumed.");
+}
 
 // Currently selected song
 let selectedIndex = 0;
@@ -153,4 +175,11 @@ else if (key === "\r") {
 
         process.exit(0);
     }
+    else if (key.toLowerCase() === "p") {
+    if (playbackState === "playing") {
+        pauseSong();
+    } else if (playbackState === "paused") {
+        resumeSong();
+    }
+}
 });
