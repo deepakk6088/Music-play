@@ -25,31 +25,29 @@ let progressTimer = null;
 
 function playSong(index) {
     if (index < 0 || index >= songs.length) {
-        console.log("No song selected.");
         return;
     }
 
-    // Stop previous song
-   if (currentAudio) {
-    currentAudio.stop();
-    currentAudio = null;
-}
+    // Stop previous playback
+    if (currentAudio) {
+        currentAudio.stop();
+        currentAudio = null;
+    }
 
-stopProgress();
+    // Stop previous progress timer
+    stopProgress();
 
-currentSong = songs[index];
-   
+    currentSong = songs[index];
 
     try {
         currentAudio = audio(currentSong);
-        stopProgress();
 
         currentAudio.on("ended", () => {
+            stopProgress();
+
             currentAudio = null;
             currentSong = null;
             playbackState = "stopped";
-
-            console.log("\nPlayback finished.");
         });
 
         currentAudio.play();
@@ -61,6 +59,8 @@ currentSong = songs[index];
         console.log(`\nPlaying: ${path.basename(currentSong)}`);
 
     } catch (error) {
+        stopProgress();
+
         console.log("\nCould not play song:", error.message);
 
         currentAudio = null;
@@ -155,6 +155,21 @@ function stopProgress() {
     }
 }
 
+function stopSong() {
+    if (!currentAudio) {
+        return;
+    }
+
+    currentAudio.stop();
+    currentAudio = null;
+    currentSong = null;
+
+    stopProgress();
+
+    playbackState = "stopped";
+
+    console.log("\nStopped.");
+}
 // add resume
 function resumeSong() {
     if (!currentAudio || playbackState !== "paused") {
@@ -243,5 +258,12 @@ else if (key === "\r") {
     } else if (playbackState === "paused") {
         resumeSong();
     }
+    else if (key.toLowerCase() === "n") {
+    nextSong();
+}
+
+else if (key.toLowerCase() === "b") {
+    previousSong();
+}
 }
 });
