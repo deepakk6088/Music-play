@@ -7,6 +7,9 @@ const songsFolder = path.join(process.cwd(), "songs");
 let songs = [];
 let currentAudio = null;
 let currentSong = null;
+ 
+let playbackState = "stopped";
+let progressTimer = null;
 
 // let currentSongIndex = -1;
  
@@ -27,15 +30,19 @@ function playSong(index) {
     }
 
     // Stop previous song
-    if (currentAudio) {
-        currentAudio.stop();
-        currentAudio = null;
-    }
+   if (currentAudio) {
+    currentAudio.stop();
+    currentAudio = null;
+}
 
-    currentSong = songs[index];
+stopProgress();
+
+currentSong = songs[index];
+   
 
     try {
         currentAudio = audio(currentSong);
+        stopProgress();
 
         currentAudio.on("ended", () => {
             currentAudio = null;
@@ -48,6 +55,8 @@ function playSong(index) {
         currentAudio.play();
 
         playbackState = "playing";
+
+        startProgress();
 
         console.log(`\nPlaying: ${path.basename(currentSong)}`);
 
@@ -91,9 +100,60 @@ function pauseSong() {
     currentAudio.pause();
     playbackState = "paused";
 
+    stopProgress();
+
     console.log("\nPaused.");
 }
 
+function displayProgress() {
+    if (!currentAudio || !currentSong) {
+        return;
+    }
+
+    const duration = currentAudio.duration || 0;
+    const position = currentAudio.currentTime || 0;
+
+    if (duration <= 0) {
+        return;
+    }
+
+    // Never allow progress to go above 100%
+    const percentage = Math.min((position / duration) * 100, 100);
+
+    const barLength = 20;
+    const filledLength = Math.floor((percentage / 100) * barLength);
+
+    const bar =
+        "█".repeat(filledLength) +
+        "-".repeat(barLength - filledLength);
+
+    console.log(
+        `\r[${bar}] ${Math.floor(percentage)}% ` +
+        `${position.toFixed(1)}s / ${duration.toFixed(1)}s`
+    );
+}
+
+
+function startProgress() {
+    stopProgress();
+
+    progressTimer = setInterval(() => {
+        if (playbackState !== "playing" || !currentAudio) {
+            stopProgress();
+            return;
+        }
+
+        displayProgress();
+    }, 500);
+}
+
+
+function stopProgress() {
+    if (progressTimer) {
+        clearInterval(progressTimer);
+        progressTimer = null;
+    }
+}
 
 // add resume
 function resumeSong() {
@@ -103,6 +163,8 @@ function resumeSong() {
 
     currentAudio.resume();
     playbackState = "playing";
+
+    startProgress();
 
     console.log("\nResumed.");
 }
